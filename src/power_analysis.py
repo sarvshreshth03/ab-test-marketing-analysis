@@ -32,23 +32,45 @@ def run_eda(df: pd.DataFrame) -> None:
     # 1. Conversion Rate by Group
     plt.figure(figsize=(6, 4))
     conv_by_group = df.groupby("test group")["converted"].mean().reset_index()
-    ax = sns.barplot(x="test group", y="converted", data=conv_by_group, palette="Blues_d")
+    ax = sns.barplot(
+        x="test group",
+        y="converted",
+        hue="test group",
+        data=conv_by_group,
+        palette="Blues_d",
+        legend=False,
+    )
     plt.title("Conversion Rate by Group")
     plt.ylabel("Conversion Rate")
     plt.xlabel("Test Group")
     for p in ax.patches:
-        ax.annotate(f"{p.get_height():.4f}", (p.get_x() + p.get_width() / 2.0, p.get_height()),
-                    ha="center", va="center", xytext=(0, 5), textcoords="offset points")
+        ax.annotate(
+            f"{p.get_height():.4f}",
+            (p.get_x() + p.get_width() / 2.0, p.get_height()),
+            ha="center",
+            va="center",
+            xytext=(0, 5),
+            textcoords="offset points",
+        )
     plt.tight_layout()
     plt.savefig(FIGURES_PATH / "conversion_rate_by_group.png", dpi=300)
     plt.close()
 
-    # 2. Total Ads Distribution (log scale due to right-skew)
+    # 2. Total Ads Distribution (KDE with log-scale x-axis to cleanly display skew)
     plt.figure(figsize=(7, 4))
-    sns.histplot(data=df, x="total ads", hue="test group", bins=50, log_scale=(False, True), common_norm=False)
+    sns.kdeplot(
+        data=df,
+        x="total ads",
+        hue="test group",
+        common_norm=False,
+        log_scale=True,
+        fill=True,
+        alpha=0.3,
+        palette="tab10",
+    )
     plt.title("Distribution of Total Ads Seen (Log Scale)")
-    plt.xlabel("Total Ads")
-    plt.ylabel("Count (log)")
+    plt.xlabel("Total Ads Seen (Log Scale)")
+    plt.ylabel("Density")
     plt.tight_layout()
     plt.savefig(FIGURES_PATH / "total_ads_distribution.png", dpi=300)
     plt.close()
